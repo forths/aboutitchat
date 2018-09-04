@@ -11,10 +11,26 @@ import time
 from os import path
 import os
 from scipy.misc import imread
+from collections import Counter
 
+_re_digist = re.compile('\d')
+_re_alpha = re.compile('[a-zA-Z]')
+_re_chinese = re.compile(u'[\u4e00-\u9fa5]')
+
+def getnum_alpha_china_words(oprwords):
+    oprwords = oprwords.split()
+    res = []
+    for j in oprwords:
+        tmp = ''
+        for i in j:
+            if _re_digist.search(i) or _re_alpha.search(i) or _re_chinese.search(i):
+                tmp += i
+            else:
+                tmp += ''
+        res.append(tmp)
+    return ' '.join(res)
 #登录方法，会弹出登录二维码，用微信扫描登录
 itchat.auto_login()
-
 #关于所有微信还有的资料信息都封装在这个方法里
 friends = itchat.get_friends(update=True)[0:]
 
@@ -25,33 +41,46 @@ siglist = []
 for i in friends:
     #过滤信息
     signature = i['Signature'].strip().replace('span','').replace('class','').replace('emoji','')
+    print(signature)
     rep = re.compile('1f\d+\w*|[<>/=]')
     signature = rep.sub('',signature)
+    signature = getnum_alpha_china_words(signature)
+    print(signature)
     siglist.append(signature)
 #所有签名信息封装在text中
 text = ''.join(siglist)
-print(text)
+
+# print(text)
 #写入本地文件
 textfile = open('info.txt','w',encoding="utf-8")
 textfile.write(text)
 text_from_file_with_apath = open('./info.txt').read()
 print(text_from_file_with_apath)
-wordlist = jieba.cut(text_from_file_with_apath)
 
-word_space_split = " ".join(wordlist)
-print(len(word_space_split))
-print(word_space_split)
-
-
+wordlist = jieba.cut(text_from_file_with_apath,cut_all=True)
+word_space_split = " ".join(wordlist).split(" ")
+res = []
+for i in word_space_split:
+    if not i:
+        continue
+    else:
+        if _re_digist.search(i) or _re_alpha.search(i) or _re_chinese.search(i):
+            if len(i) > 1:
+                res.append(i.strip())
+cres = Counter(res)
+print(len(cres))
+print(cres)
 #画图
 coloring = plt.imread('./haha.jpg')
 #设置词云相关属性
 my_wordcloud = WordCloud(background_color='white',
-                        max_words=2000,
+                        max_words=200,
                         mask=coloring,
-                        max_font_size=100,
+                        max_font_size=150,
                         random_state=42,
-                        font_path='‪C:\Windows\Fonts\simkai.ttf').generate_from_text(word_space_split)
+                        font_path='‪C:\Windows\Fonts\simkai.ttf').fit_words(cres)
+                        # font_path='‪C:\Windows\Fonts\simkai.ttf').generate_from_text(word_space_split)
+
 
 image_colors = ImageColorGenerator(coloring)
 
@@ -66,3 +95,4 @@ plt.show()
 d = path.dirname(__file__)
 # 保存图片
 my_wordcloud.to_file(path.join(d, "签名.png"))
+

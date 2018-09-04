@@ -57,4 +57,4 @@ for i in pics:
 #保存拼接后的头像
 toImage.save(user + ".BMP")
 # 此句目前有问题，待测试
-# itchat.send_image(user + ".BMP")
+itchat.send_image(user + ".BMP",toUserName='filehelper')
