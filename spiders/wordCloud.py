@@ -78,16 +78,14 @@ my_wordcloud = WordCloud(background_color='white',
 
 
 image_colors = ImageColorGenerator(coloring)
-
+# 保存图片
+d = path.dirname(__file__)
 my_wordcloud.recolor(color_func=image_colors)
-
+my_wordcloud.to_file(path.join(d, user+".png"))
+itchat.send_image(user+".png",toUserName='filehelper')
 #显示词云
 plt.imshow(my_wordcloud)
 plt.axis('off')
 plt.show()
-d = path.dirname(__file__)
-# 保存图片
-my_wordcloud.to_file(path.join(d, user+".png"))
-itchat.send_image(user+".png",toUserName='filehelper')
 print("over!")
 
