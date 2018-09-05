@@ -35,7 +35,6 @@ _re_alpha = re.compile('[a-zA-Z]')
 _re_chinese = re.compile(u'[\u4e00-\u9fa5]')
 oprwords = a.split()
 res = []
-print("22222222222222222222222222222222")
 for j in oprwords:
     tmp = ''
     for i in j:
